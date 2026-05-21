@@ -1,0 +1,46 @@
+OpenAI Tool / Function Calling
+
+Tool calling lets the model request execution of external functions during a conversation.
+
+How it works:
+1. Pass a list of tool definitions (JSON schema) in the API call.
+2. If the model decides to use a tool, it returns finish_reason="tool_calls" with a
+   tool_calls list in the assistant message — it does NOT return a text response yet.
+3. Your code executes the function and appends the result as a message with role="tool".
+4. You call the API again with the updated message history; the model sees the result
+   and generates a final text response.
+
+Tool definition structure:
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get current weather for a location",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City name"}
+                },
+                "required": ["location"]
+            }
+        }
+    }
+
+Python example (openai SDK):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        tools=tools,
+    )
+    msg = response.choices[0].message
+    if msg.tool_calls:
+        for tc in msg.tool_calls:
+            result = dispatch(tc.function.name, tc.function.arguments)
+            messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+        # call API again with updated messages
+
+Important notes:
+- Always append the assistant message (with tool_calls) before the tool result messages.
+- tool_call_id links each tool result to its request.
+- A single response may contain multiple tool calls; handle all before calling the API again.
+- Set tool_choice="auto" (default) to let the model decide; "required" forces a tool call.

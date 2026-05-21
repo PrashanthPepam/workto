@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# uv / virtualenv
+.venv/
+.uv/
+
+# Environment — never commit real keys
+.env
+.env.local
+
+# Database — runtime artefact
+data/*.db
+data/*.sqlite
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

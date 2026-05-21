@@ -1,0 +1,28 @@
+Python Async/Await Basics
+
+Python's asyncio library enables concurrent I/O-bound code using coroutines.
+
+Key concepts:
+- async def defines a coroutine function.
+- await suspends the current coroutine until the awaitable completes.
+- asyncio.run() is the entry point to run the top-level coroutine.
+- An event loop schedules and runs coroutines; only one runs at a time per thread.
+
+Example:
+    import asyncio
+
+    async def fetch_data():
+        await asyncio.sleep(1)   # simulates I/O wait
+        return {"result": "ok"}
+
+    asyncio.run(fetch_data())
+
+Common pitfalls:
+- Calling a coroutine without await does nothing; the coroutine is never executed.
+- Blocking calls (time.sleep, requests.get) inside async functions block the entire event loop.
+- Use asyncio.gather() to run multiple coroutines concurrently.
+
+When to use async:
+- Network I/O (HTTP, database queries, file reads over network)
+- High-concurrency servers where threads are expensive
+- NOT for CPU-bound work; use multiprocessing for that
