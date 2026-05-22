@@ -23,6 +23,7 @@ from fastapi.responses import JSONResponse
 from app import database
 from app.config import settings
 from app.models import HealthResponse, ReadyResponse
+from app.routers import chats, messages
 
 
 @asynccontextmanager
@@ -42,10 +43,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ── Routers (registered in Phase 3) ───────────────────────────────────────────
-# from app.routers import chats, messages
-# app.include_router(chats.router)
-# app.include_router(messages.router)
+app.include_router(chats.router)
+app.include_router(messages.router)
 
 
 # ── Ops endpoints ──────────────────────────────────────────────────────────────

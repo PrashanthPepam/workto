@@ -38,7 +38,6 @@ async def client(tmp_path, monkeypatch):
 
     monkeypatch.setattr(config.settings, "db_path", str(tmp_path / "test.db"))
 
-    # Import after monkeypatching so lifespan picks up the new db_path
     from app.main import app, lifespan
 
     async with lifespan(app):
@@ -56,3 +55,34 @@ async def db(tmp_path):
     await database.connect(str(tmp_path / "test.db"))
     yield
     await database.disconnect()
+
+
+@pytest.fixture
+async def chat_id(client: AsyncClient) -> str:
+    """Create a chat session; return its ID for use in endpoint tests."""
+    r = await client.post("/chats", json={"title": "Test Chat"})
+    return r.json()["id"]
+
+
+@pytest.fixture
+def knowledge_dir(tmp_path, monkeypatch):
+    """Temp KB directory with two sample files; monkeypatches settings.knowledge_dir."""
+    kb = tmp_path / "knowledge"
+    kb.mkdir()
+    (kb / "python_async_basics.txt").write_text(
+        "Python Async/Await Basics\n"
+        "Python's asyncio library enables concurrent I/O-bound code using coroutines.\n"
+        "Use async def to define a coroutine and await to suspend it.",
+        encoding="utf-8",
+    )
+    (kb / "fastapi_routing_guide.txt").write_text(
+        "FastAPI Routing Guide\n"
+        "FastAPI uses path operation decorators to define routes.\n"
+        "Use APIRouter to split large apps into modules.",
+        encoding="utf-8",
+    )
+
+    from app import config
+
+    monkeypatch.setattr(config.settings, "knowledge_dir", str(kb))
+    return kb
