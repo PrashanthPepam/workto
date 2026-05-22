@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     # Agent behaviour
     agent_max_iterations: int = 10
     agent_max_kb_files: int = 2
+    agent_timeout_seconds: float = 60.0  # per-LLM-call HTTP timeout
 
 
 settings = Settings()

@@ -72,6 +72,7 @@ def _make_client() -> AsyncOpenAI:
     return AsyncOpenAI(
         api_key=settings.openai_api_key,
         base_url=settings.openai_api_url,
+        timeout=settings.agent_timeout_seconds,
     )
 
 

@@ -276,12 +276,10 @@ async def test_agent_api_error_propagates(
     client: AsyncClient, chat_id: str, knowledge_dir
 ) -> None:
     """An OpenAI APIError must propagate as a 500 response."""
-    from openai import APIStatusError
+    from openai import APIConnectionError
 
     with patch("app.agent.runner._make_client") as mock_make:
         mock_openai = MagicMock()
-        # APIStatusError needs a response object; use a plain APIError instead
-        from openai import APIConnectionError
         mock_openai.chat.completions.create = AsyncMock(
             side_effect=APIConnectionError(request=MagicMock())
         )
@@ -289,6 +287,26 @@ async def test_agent_api_error_propagates(
 
         r = await client.post(
             f"/chats/{chat_id}/messages", json={"content": "Trigger API error"}
+        )
+
+    assert r.status_code == 500
+
+
+async def test_agent_timeout_returns_500(
+    client: AsyncClient, chat_id: str, knowledge_dir
+) -> None:
+    """An OpenAI timeout must also propagate as a 500 response."""
+    from openai import APITimeoutError
+
+    with patch("app.agent.runner._make_client") as mock_make:
+        mock_openai = MagicMock()
+        mock_openai.chat.completions.create = AsyncMock(
+            side_effect=APITimeoutError(request=MagicMock())
+        )
+        mock_make.return_value = mock_openai
+
+        r = await client.post(
+            f"/chats/{chat_id}/messages", json={"content": "Slow question"}
         )
 
     assert r.status_code == 500
